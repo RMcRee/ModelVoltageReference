@@ -2,16 +2,12 @@ package com.rkm;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.CholeskyDecomposition;
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.QRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
-
-import com.rkm.de.SolveByDiffEvo;
 
 import arduino.LowerMoments;
 
@@ -19,7 +15,7 @@ public class ReferenceSimulation {
 	static int seed = 123456;
 	static RandomGenerator rand = new MersenneTwister(seed);
 	public static int NumDiffs = 6;
-	static double[] measure = new double[NumDiffs+2]; // TODO: bad practice, gets around DifferentialEvolution limitations
+	//static double[] measure = new double[NumDiffs+2]; // TODO: bad practice, gets around DifferentialEvolution limitations
 	
 	double V1, V2;
 	VoltageRef v1 = new VoltageReference("LTC6655B-5 1", (V1=5.00020), 1.66, 2);
@@ -93,7 +89,7 @@ public class ReferenceSimulation {
 		//
 		// Send back appropriate deltas as measurements
 		int i = 0;
-		
+		double[] measure = new double[NumDiffs+2];
 		measure[i++] = val1[0]-val2[0];
 		measure[i++] = val1[1]-val3[0];
 		measure[i++] = val1[2]-val4[0];
@@ -131,13 +127,6 @@ public class ReferenceSimulation {
 		// prevSum[1]= val3[1]+val4[0];
 	}
 	
-	private void solveUsingDiffEvo() {
-		SolveByDiffEvo solver = new SolveByDiffEvo();
-		double[] solution = solver.getBest();
-		System.out.printf("v1  = %10.7g \t v2 = %10.7g \t r1  = %10.7g \t r2 = %10.7g\n",
-				solution[0], solution[1], solution[2], solution[3]);
-		
-	}
 	private double mean(double[] val) {
 		double mean = 0;
 		for (int i = 0; i < val.length; i++) {
@@ -173,14 +162,6 @@ public class ReferenceSimulation {
 		}
 		System.out.println("Maximum temperature = "+maxTemp);
 
-	}
-	
-	/**
-	 * Used to pass latest measurement to differential evolution classes
-	 * @return measurement vector
-	 */
-	public static double[] getLastMeasurement() {
-		return measure;
 	}
 
 }
