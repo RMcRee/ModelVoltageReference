@@ -27,7 +27,7 @@ public class StackedReference implements VoltageRef {
 	public void next(double temperature, double[] values) {
 		double[] moreVals = new double[values.length];
 		ref1.next(temperature, moreVals);
-		ref1.next(temperature, values);
+		ref2.next(temperature, values);
 		for (int i = 0; i < values.length; i++) {
 			values[i] = moreVals[i] + values[i];
 		}

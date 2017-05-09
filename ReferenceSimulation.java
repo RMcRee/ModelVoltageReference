@@ -153,7 +153,7 @@ public class ReferenceSimulation {
 					sim.solve(temp, sum);
 
 				}
-				temp += (i>=MAX/2)? -0.15 : 0.15;
+				temp += (i>=MAX/2)? -0.10 : 0.10;
 				maxTemp = Math.max(temp, maxTemp);
 				if (i==MAX/2) {
 					System.out.println("max");
