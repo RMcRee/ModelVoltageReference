@@ -14,8 +14,7 @@ import arduino.PinkNoise;
  * We do *not* model white noise.
  * We do *not* model long term drift.
  * 
- * Time scale is assumed to be one-tenth of a second. E.g. each call to next() is assumed to be
- * one-tenth of a second after the previous one. But this only matters if long-term drift is modeled.
+ * Time scale is ambiguous.
  * 
  * @author Randall McRee
  * 4/30/2017
@@ -27,6 +26,7 @@ public class VoltageReference implements VoltageRef {
 	private static final int Poles = 10;
 	private static final double pp_to_rms_1_0 = 9.3080691;
 	private static final double pp_to_rms_1_1 = 10.2289;
+	private static final double DriftThreshold = 0.999; // 1.0 is no drift. 0.998 seems to be realistic (depending on your timescale).
 	
 	
 	/**
@@ -106,6 +106,7 @@ public class VoltageReference implements VoltageRef {
 	 */
 	@Override
 	public double next(double temperature) {
+		drift();
 		double value = voltage + ( noise.nextValue()*noise_scale);
 		double deltaT = (temperature - internalTemp) * rndom.nextDouble(); // see discussion above
 		internalTemp += deltaT;
@@ -119,6 +120,7 @@ public class VoltageReference implements VoltageRef {
 	 */
 	@Override
 	public void next(double temperature, double[] values) {
+		drift();
 		double deltaT = (temperature - internalTemp) * rndom.nextDouble(); // see discussion above
 		internalTemp += deltaT;
 		double deltaV = tempco * (internalTemp - RoomTemp);
@@ -152,12 +154,23 @@ public class VoltageReference implements VoltageRef {
 		return stats.standardDeviation();
 	}
 	
+	/**
+	 * Experimental. Popcorn noise causes random shifts in output voltage.
+	 * Currently not used.
+	 * @return
+	 */
 	boolean popcorn() {
 		if (rndom.nextDouble()>0.995) {
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	void drift() {
+		if (rndom.nextDouble()>DriftThreshold){
+			voltage += (voltage*ppm.one) * (rndom.nextDouble()-0.50);
+		} 		
 	}
 
 }
